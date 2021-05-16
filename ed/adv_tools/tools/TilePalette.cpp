@@ -27,14 +27,27 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 
 		UI@ ui = script.ui;
 
-		@palette = Window(ui, "Tile Palette");
-		Label@ l = Label(ui, "Hi there!");
+		@palette = Window(ui, "Tile Palette", false);
 
-		palette.add_child(l);
+		GridLayout@ grid = GridLayout(ui, 4);
+		grid.row_spacing = 0;
+		grid.column_spacing = 0;
+		@palette.layout = grid;
+
+		ButtonGroup@ button_group = ButtonGroup(ui);
+
+		for (int i=0; i<24; ++i)
+		{
+			Button@ b = Button(ui, "" + i);
+			b.selectable = true;
+			button_group.add(b);
+			palette.add_child(b);
+		}
+
 		ui.add_child(palette);
 
 		palette.show();
-		script.window_manager.register_element(palette);
+		palette.fit_to_contents(true);
 	}
 	
 	// //////////////////////////////////////////////////////////
