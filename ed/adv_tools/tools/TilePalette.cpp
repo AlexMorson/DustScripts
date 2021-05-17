@@ -2,7 +2,7 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 {
 	
 	private Mouse@ mouse;
-	private Window@ palette;
+	private Window@ window;
 	
 	TilePalette(AdvToolScript@ script)
 	{
@@ -27,27 +27,27 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 
 		UI@ ui = script.ui;
 
-		@palette = Window(ui, "Tile Palette", false);
+		@window = Window(ui, "Tile Palette"); // , false);
 
 		GridLayout@ grid = GridLayout(ui, 4);
 		grid.row_spacing = 0;
 		grid.column_spacing = 0;
-		@palette.layout = grid;
+		@window.layout = grid;
 
 		ButtonGroup@ button_group = ButtonGroup(ui);
+		button_group.select.on(EventCallback(on_button_select));
 
 		for (int i=0; i<24; ++i)
 		{
 			Button@ b = Button(ui, "" + i);
+			b.name = "" + i;
 			b.selectable = true;
 			button_group.add(b);
-			palette.add_child(b);
+			window.add_child(b);
 		}
 
-		ui.add_child(palette);
-
-		palette.show();
-		palette.fit_to_contents(true);
+		ui.add_child(window);
+		window.fit_to_contents(true);
 	}
 	
 	// //////////////////////////////////////////////////////////
@@ -66,19 +66,35 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 	
 	void tool_select(Tool@ tool) override
 	{
-		puts("ToolSelect");
+		window.show();
 	}
 	
 	void tool_deselect(Tool@ tool) override
 	{
-		puts("ToolDeselect");
+		window.hide();
 	}
 	
 	void tool_step(Tool@ tool) override
 	{
+		if (mouse.left_press)
+		{
+
+		}
 	}
 	
 	void tool_draw(Tool@ tool, const float sub_frame) override
 	{
+	}
+	
+	// ///////////////////////////////////////////
+	// Events
+	// ///////////////////////////////////////////
+	
+	private void on_button_select(EventInfo@ event)
+	{
+		if(@event.target == null)
+			return;
+		
+		puts(event.target.name);
 	}
 }
