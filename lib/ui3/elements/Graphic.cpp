@@ -15,7 +15,7 @@ abstract class Graphic : Element
 	
 	protected float _align_h = GraphicAlign::Centre;
 	protected float _align_v = GraphicAlign::Middle;
-	protected ImageSize _sizing = ImageSize:: ConstrainInside;
+	protected ImageSize _sizing = ImageSize::ConstrainInside;
 	protected float _padding_left;
 	protected float _padding_right;
 	protected float _padding_top;
