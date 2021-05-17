@@ -3,6 +3,7 @@
 class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListener, IToolEditorLoadListener
 {
 	
+	private int current_shape = -1;
 	private Mouse@ mouse;
 	private Window@ window;
 	
@@ -63,6 +64,8 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 
 		ui.add_child(window);
 		window.fit_to_contents(true);
+
+		script.window_manager.register_element(window);
 	}
 	
 	// //////////////////////////////////////////////////////////
@@ -91,10 +94,14 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 	
 	void tool_step(Tool@ tool) override
 	{
-		if (mouse.left_press)
+        /*
+		if (mouse.left_down and not script.space)
 		{
-
+			int tile_x = int(floor(mouse.x / 48));
+			int tile_y = int(floor(mouse.y / 48));
+			script.g.set_tile(tile_x, tile_y, script.editor.get_selected_layer(), true, current_shape, 1, 1, 1);
 		}
+        */
 	}
 	
 	void tool_draw(Tool@ tool, const float sub_frame) override
@@ -107,9 +114,7 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 	
 	private void on_button_select(EventInfo@ event)
 	{
-		if(@event.target == null)
-			return;
-		
-		puts(event.target.name);
+		if (event.target is null) current_shape = -1;
+		else current_shape = parseInt(event.target.name);
 	}
 }
