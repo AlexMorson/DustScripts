@@ -1,3 +1,5 @@
+#include "../../../lib/ui3/elements/TileShapeGraphic.cpp"
+
 class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListener, IToolEditorLoadListener
 {
 	
@@ -37,10 +39,23 @@ class TilePalette : Tool, IToolSelectListener, IToolStepListener, IToolDrawListe
 		ButtonGroup@ button_group = ButtonGroup(ui);
 		button_group.select.on(EventCallback(on_button_select));
 
+		const array<int> tile_map = {
+			 8, 16,  0,  0,
+			 7, 15,  0,  0,
+			11,  3, 20, 17,
+			12,  4, 19, 18,
+			10,  9,  1,  2,
+			 6,  5, 13, 14
+		};
+
 		for (int i=0; i<24; ++i)
 		{
-			Button@ b = Button(ui, "" + i);
-			b.name = "" + i;
+			int shape = tile_map[i];
+			TileShapeGraphic@ t = TileShapeGraphic(ui, shape);
+			Button@ b = Button(ui, t);
+			b.name = "" + shape;
+			b.width = 48;
+			b.height = 48;
 			b.selectable = true;
 			button_group.add(b);
 			window.add_child(b);
