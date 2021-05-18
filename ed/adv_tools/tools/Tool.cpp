@@ -30,7 +30,8 @@ class Tool
 	protected int num_step_listeners;
 	protected int num_draw_listeners;
 	
-	protected bool selected = false;
+	protected bool _selected = false;
+    bool selected { get const { return _selected; } }
 	
 	protected void construct(AdvToolScript@ script, const string & in base_tool_name, const string &in name)
 	{
@@ -243,7 +244,7 @@ class Tool
 	
 	void on_select() final
 	{
-		selected = true;
+		_selected = true;
 		group.set_tool(this);
 		
 		if(@toolbar_button != null)
@@ -261,7 +262,7 @@ class Tool
 	
 	void on_deselect() final
 	{
-		selected = false;
+		_selected = false;
 		
 		if(@toolbar_button != null)
 		{
