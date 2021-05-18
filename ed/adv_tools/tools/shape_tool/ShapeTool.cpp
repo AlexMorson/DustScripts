@@ -1,3 +1,5 @@
+#include "../../../../lib/tiles/common.cpp"
+
 #include "TileEmbeds.cpp"
 #include "TilesWindow.cpp"
 #include "ShapeWindow.cpp"
@@ -81,7 +83,7 @@ class ShapeTool : Tool
 	{
 		if (script.space or not script.mouse_in_scene) return;
 
-		if (not mouse.left_down and not mouse.right_down) return;
+		if (not (mouse.left_down or mouse.right_down or mouse.middle_press)) return;
 
 		const int layer = script.editor.get_selected_layer();
 
@@ -116,6 +118,33 @@ class ShapeTool : Tool
 				tiles_window.sprite_tile,
 				tiles_window.sprite_palette
 			);
+		}
+
+		if (mouse.middle_press)
+		{
+			for (int tile_layer=20; tile_layer>=6; --tile_layer)
+			{
+				if (not script.editor.get_layer_visible(layer))
+					continue;
+
+				mx = script.g.mouse_x_world(0, tile_layer);
+				my = script.g.mouse_y_world(0, tile_layer);
+
+				tile_x = int(floor(mx / 48));
+				tile_y = int(floor(my / 48));
+
+				tileinfo@ tile = script.g.get_tile(tile_x, tile_y, tile_layer);
+
+				float _;
+				if (tile.solid() and point_in_tile(mx, my, tile_x, tile_y, tile.type(), _, _, tile_layer))
+				{
+					script.editor.set_selected_layer(tile_layer);
+					tiles_window.select_tile(tile.sprite_set(), tile.sprite_tile());
+					tiles_window.sprite_palette = tile.sprite_palette();
+					shape_window.tile_shape = tile.type();
+					break;
+				}
+			}
 		}
 	}
 

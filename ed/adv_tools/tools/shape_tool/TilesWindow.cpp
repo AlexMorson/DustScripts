@@ -1,19 +1,46 @@
 const array<array<int>> TILE_COUNTS = {
 	{3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1},
-    {3, 3, 3, 2, 2, 2, 2, 2, 3, 1, 3, 3, 1},
-    {4, 2, 2, 1, 1, 1},
-    {4, 2, 1, 4, 4, 4, 4, 4, 1},
-    {6, 1}
+	{3, 3, 3, 2, 2, 2, 2, 2, 3, 1, 3, 3, 1},
+	{4, 2, 2, 1, 1, 1},
+	{4, 2, 1, 4, 4, 4, 4, 4, 1},
+	{6, 1}
 };
+
+int get_tile_index(int sprite_set, int sprite_tile)
+{
+	switch (sprite_set)
+	{
+		case 1:
+			return sprite_tile - 1;
+		case 2:
+			return 21 + sprite_tile - 1;
+		case 3:
+			return 21 + 13 + sprite_tile - 1;
+		case 4:
+			return 21 + 13 + 6 + sprite_tile - 1;
+		case 5:
+			return 21 + 13 + 6 + 9 + sprite_tile - 1;
+	}
+	return -1;
+}
 
 
 class PaletteMenu : Container
 {
 	private int _sprite_set = 1;
 	private int _sprite_tile = 1;
-	private int _sprite_palette = 1;
+	private int _sprite_palette = 0;
 
-    int sprite_palette { get const { return _sprite_palette; } }
+	int sprite_palette
+	{
+		get const { return _sprite_palette; }
+		set
+		{
+			if (value == _sprite_palette) return;
+			if (value < 0 or value >= TILE_COUNTS[_sprite_set-1][_sprite_tile-1]) return;
+			cast<Button>(get_child(value)).selected = true;
+		}
+	}
 
 	private ButtonGroup@ button_group;
 
@@ -36,7 +63,7 @@ class PaletteMenu : Container
 
 		_sprite_set = sprite_set;
 		_sprite_tile = sprite_tile;
-		_sprite_palette = int(min(_sprite_palette, TILE_COUNTS[sprite_set-1][sprite_tile-1]));
+		_sprite_palette = int(min(_sprite_palette, TILE_COUNTS[sprite_set-1][sprite_tile-1] - 1));
 
 		create_ui();
 	}
@@ -46,9 +73,9 @@ class PaletteMenu : Container
 		button_group.clear();
 		clear();
 
-		for (int sprite_palette=1; sprite_palette<=TILE_COUNTS[_sprite_set-1][_sprite_tile-1]; ++sprite_palette)
+		for (int sprite_palette=0; sprite_palette<TILE_COUNTS[_sprite_set-1][_sprite_tile-1]; ++sprite_palette)
 		{
-			Image@ t = Image(ui, SPRITE_SET, "tile_" + _sprite_set + "_" + _sprite_tile + "_" + sprite_palette, 96, 96);
+			Image@ t = Image(ui, SPRITE_SET, "tile_" + _sprite_set + "_" + _sprite_tile + "_" + (sprite_palette + 1), 96, 96);
 			t.width = 72;
 			t.height = 72;
 			t.sizing = ImageSize::None;
@@ -83,10 +110,15 @@ class TilesWindow : Window
 	private int _sprite_set = 1;
 	private int _sprite_tile = 1;
 
-    int sprite_set { get const { return _sprite_set; } }
-    int sprite_tile { get const { return _sprite_tile; } }
-    int sprite_palette { get const { return palette_menu.sprite_palette; } }
+	int sprite_set { get const { return _sprite_set; } }
+	int sprite_tile { get const { return _sprite_tile; } }
+	int sprite_palette
+	{
+		get const { return palette_menu.sprite_palette; }
+		set { palette_menu.sprite_palette = value; }
+	}
 
+	private Container@ tiles_container;
 	private PaletteMenu@ palette_menu;
 
 	TilesWindow(UI@ ui)
@@ -102,7 +134,7 @@ class TilesWindow : Window
 		tiles_view.height = 6 * 72 + 7 * ui.style.spacing + 12 * EPSILON; // was having trouble with the bottom row
 		tiles_view.scroll_amount = 72 + ui.style.spacing - EPSILON;
 
-		Container@ tiles_container = tiles_view.content;
+		@tiles_container = tiles_view.content;
 
 		GridLayout@ grid = GridLayout(ui, 3);
 		@tiles_container.layout = grid;
@@ -139,6 +171,16 @@ class TilesWindow : Window
 		add_child(palette_menu);
 
 		fit_to_contents(true);
+	}
+
+	void select_tile(int sprite_set, int sprite_tile)
+	{
+		if (sprite_set == _sprite_set and sprite_tile == _sprite_tile) return;
+		if (sprite_set < 1 or sprite_set > 5) return;
+		if (sprite_tile < 1 or sprite_tile > int(TILE_COUNTS[sprite_set-1].size())) return;
+
+		int index = get_tile_index(sprite_set, sprite_tile);
+		cast<Button>(tiles_container.get_child(index)).selected = true;
 	}
 	
 	// ///////////////////////////////////////////

@@ -1,11 +1,29 @@
 #include "../../../../lib/ui3/elements/TileShapeGraphic.cpp"
 
+const array<int> SHAPE_MAP = {
+	 8, 16,  0,  0,
+	 7, 15,  0,  0,
+	11,  3, 20, 17,
+	12,  4, 19, 18,
+	10,  9,  1,  2,
+	 6,  5, 13, 14
+};
+
 class ShapeWindow : Window
 {
 
 	private int _tile_shape = 0;
 
-	int tile_shape { get const { return _tile_shape; } }
+	int tile_shape
+	{
+		get const { return _tile_shape; }
+		set
+		{
+			if (value < 0 or value > 20) return;
+			int index = SHAPE_MAP.find(value);
+			cast<Button>(get_child(index)).selected = true;
+		}
+	}
 
 	ShapeWindow(UI@ ui)
 	{
@@ -16,21 +34,12 @@ class ShapeWindow : Window
 		grid.column_spacing = 0;
 		@layout = grid;
 
-		ButtonGroup@ button_group = ButtonGroup(ui);
+		ButtonGroup@ button_group = ButtonGroup(ui, false);
 		button_group.select.on(EventCallback(on_button_select));
-
-		const array<int> tile_map = {
-			 8, 16,  0,  0,
-			 7, 15,  0,  0,
-			11,  3, 20, 17,
-			12,  4, 19, 18,
-			10,  9,  1,  2,
-			 6,  5, 13, 14
-		};
 
 		for (int i=0; i<24; ++i)
 		{
-			int tile_shape = tile_map[i];
+			int tile_shape = SHAPE_MAP[i];
 			TileShapeGraphic@ t = TileShapeGraphic(ui, tile_shape);
 
 			Button@ b = Button(ui, t);
