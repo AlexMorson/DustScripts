@@ -74,8 +74,10 @@ class Button : SingleContainer
 			if(@_group == @value)
 				return;
 			
-			value.add(this);
 			@_group = value;
+
+			if (value !is null)
+				value.add(this);
 		}
 	}
 	
