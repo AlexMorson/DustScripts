@@ -79,18 +79,64 @@ class ShapeTool : Tool
 	
 	protected void step_impl() override
 	{
-		/*
-		if (mouse.left_down and not script.space)
+		if (script.space or not script.mouse_in_scene) return;
+
+		if (not mouse.left_down and not mouse.right_down) return;
+
+		const int layer = script.editor.get_selected_layer();
+
+		float mx, my;
+		script.transform(mouse.x, mouse.y, 19, layer, mx, my);
+		int tile_x = int(floor(mx / 48));
+		int tile_y = int(floor(my / 48));
+
+		if (mouse.left_down)
 		{
-			int tile_x = int(floor(mouse.x / 48));
-			int tile_y = int(floor(mouse.y / 48));
-			script.g.set_tile(tile_x, tile_y, script.editor.get_selected_layer(), true, current_shape, 1, 1, 1);
+			script.g.set_tile(
+				tile_x,
+				tile_y,
+				layer,
+				true,
+				shape_window.tile_shape,
+				tiles_window.sprite_set,
+				tiles_window.sprite_tile,
+				tiles_window.sprite_palette
+			);
 		}
-		*/
+
+		if (mouse.right_down)
+		{
+			script.g.set_tile(
+				tile_x,
+				tile_y,
+				layer,
+				false,
+				shape_window.tile_shape,
+				tiles_window.sprite_set,
+				tiles_window.sprite_tile,
+				tiles_window.sprite_palette
+			);
+		}
 	}
 
 	protected void draw_impl(const float sub_frame) override
 	{
+		if (script.space or not script.mouse_in_scene) return;
 
+		const int layer = script.editor.get_selected_layer();
+
+		if (layer <= 5) return;
+
+		float mx, my;
+		script.transform(mouse.x, mouse.y, 19, layer, mx, my);
+		mx = 48 * floor(mx / 48);
+		my = 48 * floor(my / 48);
+		script.transform(mx, my, layer, 19, mx, my);
+
+		float sx, sy;
+		script.transform_size(48, 48, layer, 19, sx, sy);
+
+		script.g.draw_rectangle_world(22, 22, mx, my, mx + sx, my + sy, 0, Settings::HoveredFillColour);
+		outline_rect(script.g, 22, 22, mx, my, mx + sx, my + sy, Settings::DefaultLineWidth, Settings::HoveredLineColour);
 	}
 }
