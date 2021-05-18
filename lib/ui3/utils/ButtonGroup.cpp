@@ -74,6 +74,17 @@ class ButtonGroup : IGenericEventTarget
 			_set__selected_button(null);
 		}
 	}
+
+	void clear()
+	{
+		for (int i=int(buttons.size())-1; i>=0; --i)
+		{
+			@buttons[i].group = null;
+		}
+
+		buttons.resize(0);
+		_set__selected_button(null);
+	}
 	
 	bool _try_select(Button@ button, bool selected)
 	{

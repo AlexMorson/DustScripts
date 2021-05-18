@@ -33,10 +33,10 @@
 #include 'tools/edge_brush/EdgeBrushTool.cpp';
 #include 'tools/emitter_tool/EmitterTool.cpp';
 #include 'tools/prop_tool/PropTool.cpp';
+#include 'tools/shape_tool/ShapeTool.cpp';
 #include 'tools/TextTool.cpp';
 #include 'tools/ExtendedTriggerTool.cpp';
 #include 'tools/HelpTool.cpp';
-#include 'tools/TilePalette.cpp';
 #include 'ToolGroup.cpp';
 
 const string SCRIPT_BASE			= 'ed/adv_tools/';
@@ -363,7 +363,7 @@ class AdvToolScript
 		// Custom
 		
 		add_tool('Tiles',		EdgeBrushTool(this));
-		add_tool('Tiles',		TilePalette(this));
+		add_tool('Tiles',		ShapeTool(this));
 		add_tool('Props',		PropTool(this));
 		add_tool('Triggers',	TextTool(this));
 		add_tool('Triggers',	ExtendedTriggerTool(this));
