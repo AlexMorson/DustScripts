@@ -499,6 +499,11 @@ class Window : MoveableDialog
 		return _contents.remove_child(child);
 	}
 	
+	Element@ get_child(int index) override
+	{
+		return _contents.get_child(index);
+	}
+
 	void set_child_index(Element@ child, int index) override
 	{
 		_contents.set_child_index(child, index);
