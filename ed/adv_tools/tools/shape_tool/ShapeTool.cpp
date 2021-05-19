@@ -56,11 +56,12 @@ class ShapeTool : Tool
 	private void set_tile_at_mouse(bool solid)
 	{
 		const int layer = script.editor.get_selected_layer();
+		if (layer <= 5 or layer > 20) return;
 
 		float mx, my;
 		script.transform(mouse.x, mouse.y, 19, layer, mx, my);
-		int tile_x = int(floor(mx / 48));
-		int tile_y = int(floor(my / 48));
+		const int tile_x = int(floor(mx / 48));
+		const int tile_y = int(floor(my / 48));
 
 		script.g.set_tile(
 			tile_x,
@@ -81,11 +82,11 @@ class ShapeTool : Tool
 			if (not script.editor.get_layer_visible(layer))
 				continue;
 
-			float mx = script.g.mouse_x_world(0, layer);
-			float my = script.g.mouse_y_world(0, layer);
+			const float mx = script.g.mouse_x_world(0, layer);
+			const float my = script.g.mouse_y_world(0, layer);
 
-			int tile_x = int(floor(mx / 48));
-			int tile_y = int(floor(my / 48));
+			const int tile_x = int(floor(mx / 48));
+			const int tile_y = int(floor(my / 48));
 
 			tileinfo@ tile = script.g.get_tile(tile_x, tile_y, layer);
 
@@ -150,8 +151,7 @@ class ShapeTool : Tool
 		if (script.space or not script.mouse_in_scene) return;
 
 		const int layer = script.editor.get_selected_layer();
-
-		if (layer <= 5) return;
+		if (layer <= 5 or layer > 20) return;
 
 		float mx, my;
 		script.transform(mouse.x, mouse.y, 19, layer, mx, my);
