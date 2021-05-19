@@ -101,6 +101,17 @@ class ShapeTool : Tool
 			}
 		}
 	}
+
+	private void change_layer(int delta)
+	{
+		int layer = script.editor.get_selected_layer() + delta;
+		if (layer <= 5 or layer > 20) return;
+
+		if (layer == 18)
+			layer += sign(delta);
+
+		script.editor.set_selected_layer(layer);
+	}
 	
 	// //////////////////////////////////////////////////////////
 	// Callbacks
@@ -135,6 +146,8 @@ class ShapeTool : Tool
 			if (mouse.left_down) set_tile_at_mouse(true);
 			if (mouse.right_down) set_tile_at_mouse(false);
 			if (mouse.middle_press) pick_tile_at_mouse();
+
+			if (script.ctrl and mouse.scroll != 0) change_layer(mouse.scroll);
 		}
 
 		if (script.scene_focus)
