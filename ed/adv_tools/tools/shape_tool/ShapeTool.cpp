@@ -1,8 +1,10 @@
+#include "../../../../lib/drawing/tile.cpp"
 #include "../../../../lib/tiles/common.cpp"
 
 #include "TileEmbeds.cpp"
 #include "TilesWindow.cpp"
 #include "ShapeWindow.cpp"
+#include "TileShapes.cpp"
 
 const string EMBED_spr_icon_shape_tool = SPRITES_BASE + "icon_shape_tool.png";
 
@@ -13,6 +15,10 @@ class ShapeTool : Tool
 	private Mouse@ mouse;
 	private TilesWindow@ tiles_window;
 	private ShapeWindow@ shape_window;
+
+	private bool dragging;
+	private float drag_start_x, drag_start_y;
+	private TileShapes@ custom_shape;
 	
 	ShapeTool(AdvToolScript@ script)
 	{
@@ -63,16 +69,35 @@ class ShapeTool : Tool
 		const int tile_x = int(floor(mx / 48));
 		const int tile_y = int(floor(my / 48));
 
-		script.g.set_tile(
-			tile_x,
-			tile_y,
-			layer,
-			solid,
-			shape_window.tile_shape,
-			tiles_window.sprite_set,
-			tiles_window.sprite_tile,
-			tiles_window.sprite_palette
-		);
+		if (shape_window.using_custom_shape)
+		{
+			if (custom_shape !is null)
+			{
+				custom_shape.place(
+					script.g,
+					tile_x,
+					tile_y,
+					layer,
+					solid,
+					tiles_window.sprite_set,
+					tiles_window.sprite_tile,
+					tiles_window.sprite_palette
+				);
+			}
+		}
+		else
+		{
+			script.g.set_tile(
+				tile_x,
+				tile_y,
+				layer,
+				solid,
+				shape_window.tile_shape,
+				tiles_window.sprite_set,
+				tiles_window.sprite_tile,
+				tiles_window.sprite_palette
+			);
+		}
 	}
 
 	private void pick_tile_at_mouse()
@@ -112,6 +137,22 @@ class ShapeTool : Tool
 
 		script.editor.set_selected_layer(layer);
 	}
+
+	private void draw_selection()
+	{
+		const int layer = script.editor.get_selected_layer();
+		int tx1, ty1, tx2, ty2;
+		fix_tile_selection(
+			drag_start_x,
+			drag_start_y,
+			script.g.mouse_x_world(0, layer),
+			script.g.mouse_y_world(0, layer),
+			tx1, ty1, tx2, ty2
+		);
+
+		script.g.draw_rectangle_world(22, 22, 48 * tx1, 48 * ty1, 48 * tx2, 48 * ty2, 0, Settings::HoveredFillColour);
+		outline_rect(script.g, 22, 22, 48 * tx1, 48 * ty1, 48 * tx2, 48 * ty2, 1, Settings::HoveredLineColour);
+	}
 	
 	// //////////////////////////////////////////////////////////
 	// Callbacks
@@ -143,12 +184,51 @@ class ShapeTool : Tool
 	{
 		if (script.mouse_in_scene and not script.space)
 		{
-			if (mouse.left_down) set_tile_at_mouse(true);
-			if (mouse.right_down) set_tile_at_mouse(false);
+			if (not shape_window.selecting_tiles)
+			{
+				if (mouse.left_down) set_tile_at_mouse(true);
+				if (mouse.right_down) set_tile_at_mouse(false);
+			}
+
 			if (mouse.middle_press) pick_tile_at_mouse();
 
 			if (script.ctrl and mouse.scroll != 0) change_layer(mouse.scroll);
+
+			// Drag start
+			if (mouse.left_press)
+			{
+				dragging = true;
+				const int layer = script.editor.get_selected_layer();
+				drag_start_x = script.g.mouse_x_world(0, layer);
+				drag_start_y = script.g.mouse_y_world(0, layer);
+			}
+
+			// Drag end
+			if (dragging and mouse.left_release)
+			{
+				dragging = false;
+				if (shape_window.selecting_tiles)
+				{
+					const int layer = script.editor.get_selected_layer();
+
+					int tx1, ty1, tx2, ty2;
+					fix_tile_selection(
+						drag_start_x,
+						drag_start_y,
+						script.g.mouse_x_world(0, layer),
+						script.g.mouse_y_world(0, layer),
+						tx1, ty1, tx2, ty2
+					);
+
+					@custom_shape = TileShapes(tx2 - tx1, ty2 - ty1);
+					custom_shape.load(script.g, layer, tx1, ty1);
+
+					shape_window.finished_selection();
+				}
+			}
 		}
+
+		if (mouse.left_release) dragging = false;
 
 		if (script.scene_focus)
 		{
@@ -175,34 +255,57 @@ class ShapeTool : Tool
 		float sx, sy;
 		script.transform_size(1, 1, layer, 19, sx, sy);
 
-		draw_tile_shape(shape_window.tile_shape, script.g, 22, 22, mx, my, sx, sy, Settings::HoveredFillColour, Settings::HoveredLineColour);
+		if (shape_window.selecting_tiles)
+		{
+			if (dragging)
+			{
+				draw_selection();
+			}
+		}
+		else if (shape_window.using_custom_shape and custom_shape !is null)
+		{
+			custom_shape.draw(
+				script.g,
+				mx, my,
+				sx, sy,
+				Settings::HoveredFillColour, Settings::HoveredLineColour
+			);
+		}
+		else
+		{
+			draw_tile_shape(
+				shape_window.tile_shape,
+				script.g,
+				22, 22,
+				mx, my,
+				sx, sy,
+				Settings::HoveredFillColour, Settings::HoveredLineColour
+			);
+		}
 	}
 }
 
-void draw_tile_shape(int shape, scene@ g, int layer, int sub_layer, float x, float y, float scale_x, float scale_y, uint fill, uint outline)
+void fix_tile_selection(float x1, float y1, float x2, float y2, int &out tx1, int &out ty1, int &out tx2, int &out ty2)
 {
-	float x1, y1, x2, y2, x3, y3, x4, y4;
-
-	get_tile_quad(shape, x1, y1, x2, y2, x3, y3, x4, y4);
-	g.draw_quad_world(
-		layer, sub_layer, false,
-		x + scale_x * x1, y + scale_y * y1,
-		x + scale_x * x2, y + scale_y * y2,
-		x + scale_x * x3, y + scale_y * y3,
-		x + scale_x * x4, y + scale_y * y4,
-		fill, fill, fill, fill
-	);
-
-	for (int edge=0; edge<4; ++edge)
+	if (x1 <= x2)
 	{
-		if (get_edge_points(shape, edge, x1, y1, x2, y2))
-		{
-			g.draw_line_world(
-				layer, sub_layer,
-				x + scale_x * x1, y + scale_y * y1,
-				x + scale_x * x2, y + scale_y * y2,
-				2, outline
-			);
-		}
+		tx1 = int(floor(x1 / 48));
+		tx2 = int( ceil(x2 / 48));
+	}
+	else
+	{
+		tx1 = int(floor(x2 / 48));
+		tx2 = int( ceil(x1 / 48));
+	}
+
+	if (y1 <= y2)
+	{
+		ty1 = int(floor(y1 / 48));
+		ty2 = int( ceil(y2 / 48));
+	}
+	else
+	{
+		ty1 = int(floor(y2 / 48));
+		ty2 = int( ceil(y1 / 48));
 	}
 }
