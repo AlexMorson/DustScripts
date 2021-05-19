@@ -540,8 +540,6 @@ class AdvToolScript
 					pressed_key_active = true;
 					pressed_timer = Settings::KeyRepeatPeriod;
 				}
-				
-				return;
 			}
 		}
 		
