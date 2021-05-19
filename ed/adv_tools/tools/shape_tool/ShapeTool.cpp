@@ -52,6 +52,54 @@ class ShapeTool : Tool
 		build_sprite(msg, "icon_shape_tool");
 		build_tile_sprites(msg);
 	}
+
+	private void set_tile_at_mouse(bool solid)
+	{
+		const int layer = script.editor.get_selected_layer();
+
+		float mx, my;
+		script.transform(mouse.x, mouse.y, 19, layer, mx, my);
+		int tile_x = int(floor(mx / 48));
+		int tile_y = int(floor(my / 48));
+
+		script.g.set_tile(
+			tile_x,
+			tile_y,
+			layer,
+			solid,
+			shape_window.tile_shape,
+			tiles_window.sprite_set,
+			tiles_window.sprite_tile,
+			tiles_window.sprite_palette
+		);
+	}
+
+	private void pick_tile_at_mouse()
+	{
+		for (int layer=20; layer>=6; --layer)
+		{
+			if (not script.editor.get_layer_visible(layer))
+				continue;
+
+			float mx = script.g.mouse_x_world(0, layer);
+			float my = script.g.mouse_y_world(0, layer);
+
+			int tile_x = int(floor(mx / 48));
+			int tile_y = int(floor(my / 48));
+
+			tileinfo@ tile = script.g.get_tile(tile_x, tile_y, layer);
+
+			float _;
+			if (tile.solid() and point_in_tile(mx, my, tile_x, tile_y, tile.type(), _, _, layer))
+			{
+				script.editor.set_selected_layer(layer);
+				tiles_window.select_tile(tile.sprite_set(), tile.sprite_tile());
+				tiles_window.sprite_palette = tile.sprite_palette();
+				shape_window.tile_shape = tile.type();
+				break;
+			}
+		}
+	}
 	
 	// //////////////////////////////////////////////////////////
 	// Callbacks
@@ -81,70 +129,19 @@ class ShapeTool : Tool
 	
 	protected void step_impl() override
 	{
-		if (script.space or not script.mouse_in_scene) return;
-
-		if (not (mouse.left_down or mouse.right_down or mouse.middle_press)) return;
-
-		const int layer = script.editor.get_selected_layer();
-
-		float mx, my;
-		script.transform(mouse.x, mouse.y, 19, layer, mx, my);
-		int tile_x = int(floor(mx / 48));
-		int tile_y = int(floor(my / 48));
-
-		if (mouse.left_down)
+		if (script.mouse_in_scene and not script.space)
 		{
-			script.g.set_tile(
-				tile_x,
-				tile_y,
-				layer,
-				true,
-				shape_window.tile_shape,
-				tiles_window.sprite_set,
-				tiles_window.sprite_tile,
-				tiles_window.sprite_palette
-			);
+			if (mouse.left_down) set_tile_at_mouse(true);
+			if (mouse.right_down) set_tile_at_mouse(false);
+			if (mouse.middle_press) pick_tile_at_mouse();
 		}
 
-		if (mouse.right_down)
+		if (script.scene_focus)
 		{
-			script.g.set_tile(
-				tile_x,
-				tile_y,
-				layer,
-				false,
-				shape_window.tile_shape,
-				tiles_window.sprite_set,
-				tiles_window.sprite_tile,
-				tiles_window.sprite_palette
-			);
-		}
-
-		if (mouse.middle_press)
-		{
-			for (int tile_layer=20; tile_layer>=6; --tile_layer)
-			{
-				if (not script.editor.get_layer_visible(layer))
-					continue;
-
-				mx = script.g.mouse_x_world(0, tile_layer);
-				my = script.g.mouse_y_world(0, tile_layer);
-
-				tile_x = int(floor(mx / 48));
-				tile_y = int(floor(my / 48));
-
-				tileinfo@ tile = script.g.get_tile(tile_x, tile_y, tile_layer);
-
-				float _;
-				if (tile.solid() and point_in_tile(mx, my, tile_x, tile_y, tile.type(), _, _, tile_layer))
-				{
-					script.editor.set_selected_layer(tile_layer);
-					tiles_window.select_tile(tile.sprite_set(), tile.sprite_tile());
-					tiles_window.sprite_palette = tile.sprite_palette();
-					shape_window.tile_shape = tile.type();
-					break;
-				}
-			}
+			if (script.key_repeat_gvb(GVB::LeftArrow )) shape_window.move_selection(-1,  0);
+			if (script.key_repeat_gvb(GVB::RightArrow)) shape_window.move_selection( 1,  0);
+			if (script.key_repeat_gvb(GVB::UpArrow   )) shape_window.move_selection( 0, -1);
+			if (script.key_repeat_gvb(GVB::DownArrow )) shape_window.move_selection( 0,  1);
 		}
 	}
 

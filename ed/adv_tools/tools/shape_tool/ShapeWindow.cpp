@@ -13,6 +13,7 @@ class ShapeWindow : Window
 {
 
 	private int _tile_shape = 0;
+    private int _selection_index = 2;
 
 	int tile_shape
 	{
@@ -43,7 +44,7 @@ class ShapeWindow : Window
 			TileShapeGraphic@ t = TileShapeGraphic(ui, tile_shape);
 
 			Button@ b = Button(ui, t);
-			b.name = "" + tile_shape;
+			b.name = "" + i;
 			b.width = 48;
 			b.height = 48;
 			b.selectable = true;
@@ -57,6 +58,16 @@ class ShapeWindow : Window
 
 		fit_to_contents(true);
 	}
+
+    void move_selection(int dx, int dy)
+    {
+        const int x = (_selection_index % 4) + dx;
+        const int y = (_selection_index / 4) + dy;
+        if (x < 0 or x > 3 or y < 0 or y > 5) return;
+
+        const int index = 4 * y + x;
+        cast<Button>(get_child(index)).selected = true;
+    }
 	
 	// ///////////////////////////////////////////
 	// Events
@@ -66,7 +77,8 @@ class ShapeWindow : Window
 	{
 		if (event.target is null) return;
 
-		_tile_shape = parseInt(event.target.name);
+		_selection_index = parseInt(event.target.name);
+		_tile_shape = SHAPE_MAP[_selection_index];
 	}
 
 }
