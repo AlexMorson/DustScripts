@@ -36,6 +36,7 @@
 #include 'tools/TextTool.cpp';
 #include 'tools/ExtendedTriggerTool.cpp';
 #include 'tools/HelpTool.cpp';
+#include 'tools/DepthTool.cpp';
 #include 'ToolGroup.cpp';
 
 const string SCRIPT_BASE			= 'ed/adv_tools/';
@@ -365,6 +366,7 @@ class AdvToolScript
 		add_tool('Props',		PropTool(this));
 		add_tool('Triggers',	TextTool(this));
 		add_tool('Triggers',	ExtendedTriggerTool(this));
+		add_tool('Tiles',		DepthTool(this));
 		
 		sort_shortcut_tools();
 	}
