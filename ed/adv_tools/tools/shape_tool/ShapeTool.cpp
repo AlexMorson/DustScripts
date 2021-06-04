@@ -24,7 +24,7 @@ class ShapeTool : Tool
 	{
 		super(script, 'Shape Tool');
 
-		init_shortcut_key(VK::W);
+		init_shortcut_key(VK::W, -1);
 	}
 
 	void create(ToolGroup@ group) override
@@ -157,12 +157,6 @@ class ShapeTool : Tool
 	// //////////////////////////////////////////////////////////
 	// Callbacks
 	// //////////////////////////////////////////////////////////
-	
-	Tool@ on_shortcut_key() override
-	{
-		Tool@ tiles = script.get_tool('Tiles');
-		return tiles.selected ? cast<Tool>(this) : tiles;
-	}
 	
 	protected void on_select_impl()
 	{
