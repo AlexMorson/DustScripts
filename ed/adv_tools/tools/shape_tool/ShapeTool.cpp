@@ -129,9 +129,7 @@ class ShapeTool : Tool
 
 	private void change_layer(int delta)
 	{
-		int layer = script.editor.get_selected_layer() + delta;
-		if (layer <= 5 or layer > 20) return;
-
+		int layer = max(6, min(20, script.editor.get_selected_layer() + delta));
 		if (layer == 18)
 			layer += sign(delta);
 
