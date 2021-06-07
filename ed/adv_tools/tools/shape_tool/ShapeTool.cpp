@@ -2,7 +2,7 @@
 #include "../../../../lib/tiles/common.cpp"
 
 #include "TileEmbeds.cpp"
-#include "TilesWindow.cpp"
+#include "TileWindow.cpp"
 #include "ShapeWindow.cpp"
 #include "TileShapes.cpp"
 
@@ -13,7 +13,7 @@ class ShapeTool : Tool
 {
 	
 	private Mouse@ mouse;
-	private TilesWindow@ tiles_window;
+	private TileWindow@ tile_window;
 	private ShapeWindow@ shape_window;
 
 	private bool dragging;
@@ -40,11 +40,11 @@ class ShapeTool : Tool
 
 		UI@ ui = script.ui;
 
-		@tiles_window = TilesWindow(ui);
-		tiles_window.x = 90;
-		tiles_window.y = 70;
-		ui.add_child(tiles_window);
-		script.window_manager.register_element(tiles_window);
+		@tile_window = TileWindow(ui);
+		tile_window.x = 90;
+		tile_window.y = 70;
+		ui.add_child(tile_window);
+		script.window_manager.register_element(tile_window);
 
 		@shape_window = ShapeWindow(ui);
 		shape_window.x = 460;
@@ -79,9 +79,9 @@ class ShapeTool : Tool
 					tile_y,
 					layer,
 					solid,
-					tiles_window.sprite_set,
-					tiles_window.sprite_tile,
-					tiles_window.sprite_palette
+					tile_window.sprite_set,
+					tile_window.sprite_tile,
+					tile_window.sprite_palette
 				);
 			}
 		}
@@ -93,9 +93,9 @@ class ShapeTool : Tool
 				layer,
 				solid,
 				shape_window.tile_shape,
-				tiles_window.sprite_set,
-				tiles_window.sprite_tile,
-				tiles_window.sprite_palette
+				tile_window.sprite_set,
+				tile_window.sprite_tile,
+				tile_window.sprite_palette
 			);
 		}
 	}
@@ -119,8 +119,8 @@ class ShapeTool : Tool
 			if (tile.solid() and point_in_tile(mx, my, tile_x, tile_y, tile.type(), _, _, layer))
 			{
 				script.editor.set_selected_layer(layer);
-				tiles_window.select_tile(tile.sprite_set(), tile.sprite_tile());
-				tiles_window.sprite_palette = tile.sprite_palette();
+				tile_window.select_tile(tile.sprite_set(), tile.sprite_tile());
+				tile_window.sprite_palette = tile.sprite_palette();
 				shape_window.tile_shape = tile.type();
 				break;
 			}
@@ -160,7 +160,7 @@ class ShapeTool : Tool
 	{
 		script.editor.hide_panels_gui(true);
 
-		tiles_window.show();
+		tile_window.show();
 		shape_window.show();
 	}
 	
@@ -168,7 +168,7 @@ class ShapeTool : Tool
 	{
 		script.editor.hide_panels_gui(false);
 
-		tiles_window.hide();
+		tile_window.hide();
 		shape_window.hide();
 	}
 	

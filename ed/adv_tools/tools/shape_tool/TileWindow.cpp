@@ -104,7 +104,7 @@ class PaletteMenu : Container
 }
 
 
-class TilesWindow : Window
+class TileWindow : Window
 {
 
 	private int _sprite_set = 1;
@@ -118,26 +118,26 @@ class TilesWindow : Window
 		set { palette_menu.sprite_palette = value; }
 	}
 
-	private Container@ tiles_container;
+	private Container@ tile_container;
 	private PaletteMenu@ palette_menu;
 
-	TilesWindow(UI@ ui)
+	TileWindow(UI@ ui)
 	{
 		super(ui, "Tile", false);
 
 		@layout = FlowLayout(ui, FlowDirection::Column);
 
-		ScrollView@ tiles_view = ScrollView(ui);
-		tiles_view.x = 0;
-		tiles_view.y = 0;
-		tiles_view.width = 3 * 72 + 5 * ui.style.spacing + ui.style.default_scrollbar_size;
-		tiles_view.height = 6 * 72 + 7 * ui.style.spacing + 12 * EPSILON; // was having trouble with the bottom row
-		tiles_view.scroll_amount = 72 + ui.style.spacing - EPSILON;
+		ScrollView@ tile_view = ScrollView(ui);
+		tile_view.x = 0;
+		tile_view.y = 0;
+		tile_view.width = 3 * 72 + 5 * ui.style.spacing + ui.style.default_scrollbar_size;
+		tile_view.height = 6 * 72 + 7 * ui.style.spacing + 12 * EPSILON; // was having trouble with the bottom row
+		tile_view.scroll_amount = 72 + ui.style.spacing - EPSILON;
 
-		@tiles_container = tiles_view.content;
+		@tile_container = tile_view.content;
 
 		GridLayout@ grid = GridLayout(ui, 3);
-		@tiles_container.layout = grid;
+		@tile_container.layout = grid;
 
 		ButtonGroup@ button_group = ButtonGroup(ui, false);
 		button_group.select.on(EventCallback(on_tile_select));
@@ -158,7 +158,7 @@ class TilesWindow : Window
 				b.selectable = true;
 
 				button_group.add(b);
-				tiles_container.add_child(b);
+				tile_container.add_child(b);
 
 				if (sprite_set == 1 and sprite_tile == 1)
 					b.selected = true;
@@ -167,7 +167,7 @@ class TilesWindow : Window
 
 		@palette_menu = PaletteMenu(ui);
 
-		add_child(tiles_view);
+		add_child(tile_view);
 		add_child(palette_menu);
 
 		fit_to_contents(true);
@@ -180,7 +180,7 @@ class TilesWindow : Window
 		if (sprite_tile < 1 or sprite_tile > int(TILE_COUNTS[sprite_set-1].size())) return;
 
 		int index = get_tile_index(sprite_set, sprite_tile);
-		cast<Button>(tiles_container.get_child(index)).selected = true;
+		cast<Button>(tile_container.get_child(index)).selected = true;
 	}
 	
 	// ///////////////////////////////////////////
