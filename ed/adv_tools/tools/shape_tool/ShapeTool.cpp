@@ -36,7 +36,7 @@ class ShapeTool : Tool
 	
 	void on_init() override
 	{
-		@mouse = @script.mouse;
+		@mouse = script.mouse;
 
 		UI@ ui = script.ui;
 
@@ -116,7 +116,7 @@ class ShapeTool : Tool
 			tileinfo@ tile = script.g.get_tile(tile_x, tile_y, layer);
 
 			float _;
-			if (tile.solid() and point_in_tile(mx, my, tile_x, tile_y, tile.type(), _, _, layer))
+			if (tile.solid() and point_in_tile(mx, my, tile_x, tile_y, tile.type(), _, _))
 			{
 				script.editor.set_selected_layer(layer);
 				tile_window.select_tile(tile.sprite_set(), tile.sprite_tile());
@@ -148,15 +148,19 @@ class ShapeTool : Tool
 			tx1, ty1, tx2, ty2
 		);
 
-		script.g.draw_rectangle_world(22, 22, 48 * tx1, 48 * ty1, 48 * tx2, 48 * ty2, 0, Settings::HoveredFillColour);
-		outline_rect(script.g, 22, 22, 48 * tx1, 48 * ty1, 48 * tx2, 48 * ty2, 1, Settings::HoveredLineColour);
+		float x1, y1, x2, y2;
+		script.transform(48 * tx1, 48 * ty1, layer, 19, x1, y1);
+		script.transform(48 * tx2, 48 * ty2, layer, 19, x2, y2);
+
+		script.g.draw_rectangle_world(22, 22, x1, y1, x2, y2, 0, Settings::HoveredFillColour);
+		outline_rect(script.g, 22, 22, x1, y1, x2, y2, 1, Settings::HoveredLineColour);
 	}
 	
 	// //////////////////////////////////////////////////////////
 	// Callbacks
 	// //////////////////////////////////////////////////////////
 	
-	protected void on_select_impl()
+	protected void on_select_impl() override
 	{
 		script.editor.hide_panels_gui(true);
 
@@ -164,7 +168,7 @@ class ShapeTool : Tool
 		shape_window.show();
 	}
 	
-	protected void on_deselect_impl()
+	protected void on_deselect_impl() override
 	{
 		script.editor.hide_panels_gui(false);
 
